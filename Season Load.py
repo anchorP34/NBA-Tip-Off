@@ -19,11 +19,11 @@ def player_info(player_url):
     player_name = player_soup.find_all('h1',attrs = {'itemprop':'name'})[0].text
 
     player_height = player_soup.find_all(attrs = {'itemprop':'height'})[0].text
-    player_height_inches = player_height.split()[0] * 12 + player_height.split()[1]
+    player_height_inches = int(player_height.split('-')[0]) * 12 + int(player_height.split('-')[1])
     player_birthday = player_soup.find_all(attrs = {'itemprop':'birthDate'})[0].text.replace('\n','').split()
 
     full_birthday_date = " ".join(player_birthday).replace(',','')
-    birthday_datetime = datetime.strptime(full_birthday_datetime, '%B %d %Y')
+    birthday_datetime = datetime.strptime(full_birthday_date, '%B %d %Y')
 
     birth_year = birthday_datetime.year
     birth_month = birthday_datetime.month
@@ -64,7 +64,7 @@ for game in season_tbody.find_all('tr'):
     #season_games.append(game_data)
 
 
-    game_request = requests.get('https://www.basketball-reference.com/{}.html'.format(game_data['game_url'].replace('boxscores/','boxscores/pbp/')))
+    game_request = requests.get('https://www.basketball-reference.com/{}'.format(game_data['game_url'].replace('boxscores/','boxscores/pbp/')))
     game_soup = BeautifulSoup(game_request.text, 'lxml')
 
     print('https://www.basketball-reference.com/{}.html'.format(game_data['game_url'].replace('boxscores/','boxscores/pbp/')), 'Has Loaded')
@@ -72,6 +72,10 @@ for game in season_tbody.find_all('tr'):
     play_by_play = game_soup.find_all('tr')
 
     # Tip off
+    while play_by_play[2].contents[3].text == '\xa0':
+        play_by_play.pop(2)
+
+
     tip_off_players = play_by_play[2].contents[3].find_all('a')[:2]
 
     away_center_url = tip_off_players[0].attrs['href']
@@ -97,16 +101,22 @@ for game in season_tbody.find_all('tr'):
         visiting_team_event = play[3].text.replace('\xa0','')
         if visiting_team_event != '':
             posession = game_data['game_away_team']
-            visiting_player_url = play[3].a.attrs['href']
-            visiting_team_player = player_id(visiting_player_url)
+            if play[3].a != None:
+                visiting_player_url = play[3].a.attrs['href']
+                visiting_team_player = player_id(visiting_player_url)
+            else:
+                visiting_team_player = ''
         else:
             visiting_team_player = ''
 
         home_team_event = play[7].text.replace('\xa0','')
         if home_team_event != '':
             posession = game_data['game_home_team']
-            home_player_url = play[7].a.attrs['href']
-            home_team_player = player_id(home_player_url)
+            if play[7].a != None:
+                home_player_url = play[7].a.attrs['href']
+                home_team_player = player_id(home_player_url)
+            else:
+                home_team_player = ''
         else:
             home_team_player = ''
 
