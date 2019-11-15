@@ -27,7 +27,7 @@ def player_info(player_url):
 
     birth_year = birthday_datetime.year
     birth_month = '0{}'.format(birthday_datetime.month) if birthday_datetime.month < 10 else birthday_datetime.month
-    birth_day= birthday_datetime.day
+    birth_day = '0{}'.format(birthday_datetime.day) if birthday_datetime.day < 10 else birthday_datetime.day
 
     birth_yyyy_mm_dd = '{}-{}-{}'.format(birth_year,  birth_month, birth_day)
 
